@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama de Acordeón</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <h1>🪗 Acordeón Diatónico</h1>
+
+    <div class="tuning-pills">
+      <button class="tuning-pill active" data-tuning="G">Sol <span style="font-weight:400;font-size:11px">(G/C/F)</span></button>
+      <button class="tuning-pill" data-tuning="F">Fa <span style="font-weight:400;font-size:11px">(F/Bb/Eb)</span></button>
+      <button class="tuning-pill" data-tuning="E">Mi <span style="font-weight:400;font-size:11px">(E/A/D)</span></button>
+      <button class="tuning-pill" data-tuning="Bb">Sib <span style="font-weight:400;font-size:11px">5 Letras</span></button>
+    </div>
+
+    <div class="notation-toggle">
+      Notas:
+      <button data-notation="flat" class="active">Bemoles</button>
+      <button data-notation="sharp">Sostenidos</button>
+      <button data-notation="en">EN</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── Diagrams (multiple supported) ── -->
+    <div class="diagram-area">
+      <div id="diagrams-wrapper">
+        <!-- Accordion panels injected by app.js -->
+      </div>
+    </div>
+
+    <!-- ── Controls ── -->
+    <div class="controls-panel">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="chords">Acordes</button>
+        <div class="tab-group">
+          <div class="tab-group-label">Escalas</div>
+          <div class="tab-group-tabs">
+            <button class="tab-btn" data-tab="scales">Sencillas</button>
+            <button class="tab-btn" data-tab="terceras">Terceras</button>
+            <button class="tab-btn" data-tab="sextas">Sextas</button>
+            <button class="tab-btn" data-tab="armonica">Armonizada</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-content">
+        <!-- Injected by tab router in app.js -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Diagrama de Acordeón Diatónico · Sol / Fa / Mi / Sib (5 Letras)
+  </footer>
+
+</div>
+
+<script src="data/tunings.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
