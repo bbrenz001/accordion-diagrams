@@ -154,7 +154,7 @@ function findChordVoicings(tuningKey, root, chordId) {
   const base = [...pull, ...push];
 
   // Prepend saved custom chords with ★ marker
-  const customKey = `chord_custom_${chordId}`;
+  const customKey = chordStorageKey(root, chordId);
   const d0 = _storageGet();
   const customs = (d0.chords && d0.chords[customKey]) || [];
   const customVoicings = customs.map(c => ({ ...c, custom: true }));
@@ -1117,7 +1117,7 @@ function refreshScaleControls() {
 // ── Chord storage ─────────────────────────────────────────────────────────────
 
 function chordStorageKey(root, type) {
-  return `chord_custom_${type}`;
+  return `chord_custom_${root}_${type}`;
 }
 function saveCustomChord(key, voicing) {
   const d = _storageGet();
