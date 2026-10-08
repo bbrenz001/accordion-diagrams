@@ -283,7 +283,7 @@ function findIntervalPairs(tuningKey, rootNote, intervalSemitones) {
 
 // ── Multi-diagram highlight storage ──────────────────────────────────────────
 
-const _hl = { 0: [], 1: [], 2: [], 3: [] };
+const _hl = { 0: [], 1: [], 2: [], 3: [], 4: [] };
 function setHL(id, hl)     { _hl[id] = hl; }
 function getHL(id)         { return _hl[id] || []; }
 // Always write to the first diagram of the current tab
@@ -472,6 +472,19 @@ function _createDiagramPanel(diag, panelNum) {
     rowWrapper.appendChild(rowEl);
     rowsDiv.appendChild(rowWrapper);
   });
+  if (state.tab === 'libre') {
+    const noteWrap = document.createElement('div');
+    noteWrap.className = 'libre-note-wrap';
+    const noteInput = document.createElement('input');
+    noteInput.type = 'text';
+    noteInput.className = 'libre-note-input';
+    noteInput.placeholder = 'Nota / Label...';
+    noteInput.value = diag.note || '';
+    noteInput.addEventListener('input', () => { diag.note = noteInput.value; saveLibreSlot(); });
+    noteInput.addEventListener('click', e => e.stopPropagation());
+    noteWrap.appendChild(noteInput);
+    panel.appendChild(noteWrap);
+  }
   panel.appendChild(rowsDiv);
 
   const removeBtn = hdr.querySelector('[data-remove]');
@@ -490,12 +503,15 @@ function addDiagram() {
   const id   = state.nextDiagramId++;
   const diag = state.tab === 'scales'
     ? { id, slot: String(currentDiagrams().length + 1) }
+    : state.tab === 'libre'
+    ? { id, note: '' }
     : { id };
   currentDiagrams().push(diag);
   _hl[id] = [];
   saveDiagramLayout();
   renderAllDiagrams();
   if (state.tab === 'scales') updateScales();
+  else if (state.tab === 'libre') { saveLibreSlot(); applyHighlights(); }
   else applyHighlights();
 }
 
@@ -521,8 +537,9 @@ const state = {
     terceras: [{ id: 2 }],
     sextas:   [{ id: 3 }],
     armonica: [],
+    libre:    [{ id: 4, note: '' }],
   },
-  nextDiagramId: 4,
+  nextDiagramId: 5,
   // chords
   chordRoot: 'G',
   chordType: 'major',
@@ -558,6 +575,9 @@ const state = {
   // armónica
   armonicaRoot: 'G',
   armonicaType: 'major',
+  // libre
+  libreSlot:   '1',
+  libreNumber: '1',
 };
 
 const ALL_ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -1574,6 +1594,124 @@ function _handleIntervalEditClick(prefix, diagramId, rIdx, bIdx, dir) {
   if (saveBtn) saveBtn.disabled = n === 0;
 }
 
+// ── Tab: Libre ────────────────────────────────────────────────────────────────
+
+function libreStorageKey(slot) {
+  return `libre_v${slot}`;
+}
+
+function saveLibreSlot() {
+  const d = _storageGet();
+  d.libre = d.libre || {};
+  d.libre[libreStorageKey(state.libreSlot)] = currentDiagrams().map(diag => ({
+    steps: getHL(diag.id).map(h => ({ row: h.row, btn: h.btn, dir: h.dir, label: h.label, color: h.color })),
+    note: diag.note || '',
+  }));
+  _storageSet(d);
+  saveDiagramLayout();
+}
+
+function loadLibreSlot(slot) {
+  const saved = (_storageGet().libre || {})[libreStorageKey(slot)];
+  const diagrams = state.tabDiagrams.libre;
+
+  if (!saved || saved.length === 0) {
+    while (diagrams.length > 1) { const r = diagrams.pop(); delete _hl[r.id]; }
+    if (diagrams.length === 0) { const id = state.nextDiagramId++; _hl[id] = []; diagrams.push({ id, note: '' }); }
+    diagrams.forEach(d => { d.note = ''; setHL(d.id, []); });
+  } else {
+    while (diagrams.length < saved.length) {
+      const id = state.nextDiagramId++;
+      _hl[id] = [];
+      diagrams.push({ id, note: '' });
+    }
+    while (diagrams.length > saved.length) {
+      const r = diagrams.pop();
+      delete _hl[r.id];
+    }
+    saved.forEach((panel, i) => {
+      diagrams[i].note = panel.note || '';
+      setHL(diagrams[i].id, (panel.steps || []).map(s => ({
+        row: s.row, btn: s.btn, dir: s.dir, style: 'highlight', label: s.label, color: s.color,
+      })));
+    });
+  }
+  saveDiagramLayout();
+  renderAllDiagrams();
+  applyHighlights();
+}
+
+function handleLibreClick(diagramId, rIdx, bIdx, dir) {
+  if (!_hl[diagramId]) _hl[diagramId] = [];
+  const hl = _hl[diagramId];
+  const existing = hl.findIndex(h => h.row === rIdx && h.btn === bIdx && h.dir === dir);
+  if (existing !== -1) {
+    hl.splice(existing, 1);
+  } else {
+    hl.push({ row: rIdx, btn: bIdx, dir, style: 'highlight', label: state.libreNumber, color: state.editColor || 'yellow' });
+  }
+  applyHL(diagramId);
+  saveLibreSlot();
+}
+
+function buildLibreUI() {
+  const panel = document.getElementById('tab-content');
+  const ec = state.editColor || 'yellow';
+  panel.innerHTML = `
+    <div class="control-group">
+      <div class="control-label">Slot</div>
+      <div class="libre-slots">
+        ${['1','2','3','4'].map(s => `<button class="libre-slot-btn${s===state.libreSlot?' active':''}" data-ls="${s}">S${s}</button>`).join('')}
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Número</div>
+      <div class="libre-nums">
+        ${['1','2','3','4','5','6','7','8','9'].map(n => `<button class="libre-num-btn${n===state.libreNumber?' active':''}" data-ln="${n}">${n}</button>`).join('')}
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="color-picker">
+        <span style="font-size:11px;color:var(--muted)">Color:</span>
+        <button class="color-dot${ec==='yellow'?' active':''}" data-ec="yellow" style="background:#e8c84a" title="Amarillo"></button>
+        <button class="color-dot${ec==='red'   ?' active':''}" data-ec="red"    style="background:#e05050" title="Rojo"></button>
+        <button class="color-dot${ec==='blue'  ?' active':''}" data-ec="blue"   style="background:#4080e0" title="Azul"></button>
+        <button class="color-dot${ec==='green' ?' active':''}" data-ec="green"  style="background:#3caa3c" title="Verde"></button>
+        <button class="color-dot${ec==='orange'?' active':''}" data-ec="orange" style="background:#d08020" title="Naranja"></button>
+        <button class="color-dot${ec==='purple'?' active':''}" data-ec="purple" style="background:#9040d0" title="Morado"></button>
+      </div>
+    </div>
+    <div class="results-info" style="font-size:10px;color:var(--muted)">
+      Selecciona número + color, clic en botón del acordeón para marcar. Clic otra vez para borrar.
+    </div>`;
+
+  panel.querySelectorAll('[data-ls]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.ls === state.libreSlot) return;
+      saveLibreSlot();
+      state.libreSlot = btn.dataset.ls;
+      panel.querySelectorAll('[data-ls]').forEach(b => b.classList.toggle('active', b === btn));
+      loadLibreSlot(state.libreSlot);
+    });
+  });
+
+  panel.querySelectorAll('[data-ln]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.libreNumber = btn.dataset.ln;
+      panel.querySelectorAll('[data-ln]').forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+
+  panel.querySelectorAll('[data-ec]').forEach(dot => {
+    dot.addEventListener('click', () => {
+      state.editColor = dot.dataset.ec;
+      panel.querySelectorAll('[data-ec]').forEach(d => d.classList.toggle('active', d === dot));
+    });
+  });
+
+  loadLibreSlot(state.libreSlot);
+}
+
 // ── Tab router ────────────────────────────────────────────────────────────────
 
 function switchTab(tab) {
@@ -1596,6 +1734,7 @@ function switchTab(tab) {
     case 'terceras': buildTercerasUI(); break;
     case 'sextas':   buildSextasUI();   break;
     case 'armonica': buildArmonicaUI(); break;
+    case 'libre':    buildLibreUI();    break;
   }
 }
 
@@ -1640,7 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
     document.getElementById('diagrams-wrapper').addEventListener('click', e => {
-      const anyEdit = state.editMode || state.chordEditMode || state.tercEditMode || state.sextEditMode;
+      const anyEdit = state.editMode || state.chordEditMode || state.tercEditMode || state.sextEditMode || state.tab === 'libre';
       if (!anyEdit) return;
       const half = e.target.closest('.btn-half');
       if (!half) return;
@@ -1654,6 +1793,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (state.chordEditMode) handleChordEditClick(diagramId, rIdx, bIdx, dir);
       else if (state.tercEditMode)  _handleIntervalEditClick('terc', diagramId, rIdx, bIdx, dir);
       else if (state.sextEditMode)  _handleIntervalEditClick('sext', diagramId, rIdx, bIdx, dir);
+      else if (state.tab === 'libre') handleLibreClick(diagramId, rIdx, bIdx, dir);
     });
   }
 
@@ -1674,6 +1814,9 @@ document.addEventListener('DOMContentLoaded', () => {
       Object.values(state.tabDiagrams).forEach(diagrams => {
         diagrams.forEach(d => { if (!_hl[d.id]) _hl[d.id] = []; });
       });
+      // Ensure nextDiagramId is beyond all known IDs (guards against cross-tab conflicts)
+      const allIds = Object.values(state.tabDiagrams).flat().map(d => d.id);
+      if (allIds.length > 0) state.nextDiagramId = Math.max(state.nextDiagramId, Math.max(...allIds) + 1);
     }
 
     setupListeners();

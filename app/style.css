@@ -354,7 +354,7 @@ main {
 /* ── Tabs ─────────────────────────────────────────────────────── */
 .tab-bar {
   display: grid;
-  grid-template-columns: 1fr 3fr;
+  grid-template-columns: 1fr 3fr 1fr;
   gap: 4px;
   align-items: end;
 }
@@ -590,6 +590,64 @@ select:focus { outline: none; border-color: var(--push-hi); }
   transition: all 0.1s;
 }
 .panel-remove-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+/* ── Libre tab ─────────────────────────────────────────────────── */
+.libre-note-wrap {
+  padding: 4px 8px 0;
+}
+.libre-note-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.libre-note-input:focus { outline: none; border-color: var(--active); }
+.libre-note-input::placeholder { color: var(--muted); }
+.libre-slots {
+  display: flex;
+  gap: 5px;
+}
+.libre-slot-btn {
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.libre-slot-btn:hover  { border-color: var(--muted); color: var(--text); }
+.libre-slot-btn.active { background: var(--active); color: #000; border-color: var(--active); }
+.libre-nums {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.libre-num-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.libre-num-btn:hover  { border-color: var(--muted); color: var(--text); }
+.libre-num-btn.active { background: var(--active); color: #000; border-color: var(--active); }
 
 .accordion-rows {
   display: flex;
