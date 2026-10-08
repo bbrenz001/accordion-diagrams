@@ -391,7 +391,8 @@ function _createDiagramPanel(diag, panelNum) {
       const vIdx = voicings.length > 0 ? Math.min(diag.vIdx || 0, voicings.length - 1) : 0;
       const v = voicings[vIdx];
       const dirLbl = v ? (v.dir === 'push' ? '↓' : '↑') : '';
-      const navLbl = voicings.length > 0 ? `${dirLbl} ${vIdx+1}/${voicings.length}` : '—';
+      const star   = v && v.custom ? '★ ' : '';
+      const navLbl = voicings.length > 0 ? `${star}${dirLbl} ${vIdx+1}/${voicings.length}` : '—';
       armonicaNavHtml = `<div class="diagram-chord-nav">
         <button class="chord-nav-btn" data-arm-prev="${diagramId}">‹</button>
         <span class="chord-nav-lbl">${deg.l} ${dispNote(chordRoot, state.notation)} ${navLbl}</span>

@@ -353,11 +353,22 @@ main {
 
 /* ── Tabs ─────────────────────────────────────────────────────── */
 .tab-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tab-bar-row {
   display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
+  grid-template-columns: 1fr 3fr;
   gap: 4px;
   align-items: end;
 }
+.tab-btn-libre {
+  width: 100%;
+  border-style: dashed;
+  color: var(--muted);
+}
+.tab-btn-libre.active { border-style: solid; }
 .tab-group {
   display: flex;
   flex-direction: column;
