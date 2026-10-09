@@ -59,8 +59,8 @@ window = webview.create_window(
     url=f'file:///{INDEX.replace(os.sep, "/")}',
     js_api=api,
     width=1100,
-    height=720,
-    min_size=(800, 600),
+    height=680,
+    min_size=(800, 560),
     resizable=True,
 )
 
