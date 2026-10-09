@@ -1789,6 +1789,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+    document.getElementById('btn-backup')?.addEventListener('click', async () => {
+      if (!window.pywebview?.api) { alert('Backup only works in the desktop app.'); return; }
+      const btn = document.getElementById('btn-backup');
+      btn.textContent = '⏳';
+      btn.disabled = true;
+      try {
+        const path = await window.pywebview.api.backup_data();
+        btn.textContent = path ? '✓ Backup guardado' : '⚠ Sin datos';
+      } catch { btn.textContent = '⚠ Error'; }
+      setTimeout(() => { btn.textContent = '💾 Backup'; btn.disabled = false; }, 2500);
+    });
     document.getElementById('diagrams-wrapper').addEventListener('click', e => {
       const anyEdit = state.editMode || state.chordEditMode || state.tercEditMode || state.sextEditMode || state.tab === 'libre';
       if (!anyEdit) return;

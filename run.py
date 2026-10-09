@@ -35,6 +35,22 @@ class Api:
             print(f'save_data error: {e}')
             return False
 
+    def backup_data(self):
+        import shutil
+        from datetime import datetime
+        try:
+            if not os.path.exists(DATA_FILE):
+                return None
+            backup_dir = os.path.join(os.path.dirname(DATA_FILE), 'backups')
+            os.makedirs(backup_dir, exist_ok=True)
+            ts  = datetime.now().strftime('%Y%m%d_%H%M%S')
+            dst = os.path.join(backup_dir, f'user_data_{ts}.json')
+            shutil.copy2(DATA_FILE, dst)
+            return dst
+        except Exception as e:
+            print(f'backup_data error: {e}')
+            return None
+
 
 api = Api()
 

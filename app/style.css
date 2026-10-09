@@ -695,7 +695,23 @@ footer {
   font-size: 11px;
   color: var(--muted);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
+#btn-backup {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+#btn-backup:hover:not(:disabled) { border-color: var(--active); color: var(--text); }
+#btn-backup:disabled { opacity: 0.5; cursor: default; }
 
 /* ── Scrollbar ───────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
