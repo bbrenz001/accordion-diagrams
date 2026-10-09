@@ -752,10 +752,17 @@ function updateChords() {
   // Chord edit launch (outside edit mode)
   const editArea = document.getElementById('chord-edit-area');
   if (editArea && !state.chordEditMode) {
+    const customKey = chordStorageKey(state.chordRoot, state.chordType);
+    const hasCustom = loadCustomChords(customKey).length > 0;
     editArea.innerHTML = `<div class="scale-edit-actions">
       <button class="edit-launch-btn" id="btn-chord-edit">✏️ Guardar acorde propio</button>
+      ${hasCustom ? '<button class="edit-reset-btn" id="btn-chord-delete">↩ Borrar guardados</button>' : ''}
     </div>`;
     document.getElementById('btn-chord-edit').addEventListener('click', enterChordEditMode);
+    document.getElementById('btn-chord-delete')?.addEventListener('click', () => {
+      deleteCustomChords(customKey);
+      updateChords();
+    });
   }
 
   showVoicing(0);
@@ -1118,7 +1125,10 @@ function refreshScaleControls() {
 // ── Chord storage ─────────────────────────────────────────────────────────────
 
 function chordStorageKey(root, type) {
-  return `chord_custom_${root}_${type}`;
+  // Keyed by semitone offset from the accordion's home key so the same
+  // fingering loads automatically when you switch tuning (G→F→Bb etc.).
+  const offset = (noteNum(root) - noteNum(state.tuning) + 12) % 12;
+  return `chord_custom_offset${offset}_${type}`;
 }
 function saveCustomChord(key, voicing) {
   const d = _storageGet();
